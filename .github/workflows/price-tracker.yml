@@ -1,0 +1,61 @@
+name: Price Tracker
+
+on:
+  schedule:
+    - cron: '0 4 * * *'  # Daily at 4 AM UTC
+  workflow_dispatch:
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          # Updated package names for Ubuntu 24.04
+          sudo apt-get install -y libxss1 libasound2t64 libatk-bridge2.0-0 libgtk-4-1 libnss3
+          pip install -r requirements.txt
+          
+      - name: Run price tracker
+        run: |
+          python tracker.py
+          
+      - name: Generate report summary
+        run: |
+          echo "### Price Tracker Report" > report.md
+          echo "**Run Date:** $(date)" >> report.md
+          echo "#### Products Tracked:" >> report.md
+          if [ -f "reports/latest_run.json" ]; then
+            jq -r '.products[] | "- \(.name): ₹\(.latest_price)"' reports/latest_run.json >> report.md
+          else
+            echo "No report generated (possible error)" >> report.md
+          fi
+          echo "![Price Trend](https://github.com/${{ github.repository }}/raw/${{ github.ref }}/reports/sample_trend.png)" >> report.md
+          
+      - name: Commit and push results
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add price_history.db reports/ || echo "No files to add"
+          git commit -m "Update price data and reports" || echo "No changes to commit"
+          git push
+          
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: price-reports
+          path: |
+            reports/
+            report.md
