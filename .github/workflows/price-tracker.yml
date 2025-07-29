@@ -8,7 +8,7 @@ on:
 jobs:
   track:
     runs-on: ubuntu-latest
-    timeout-minutes: 15  # Prevent infinite runs
+    timeout-minutes: 15
     permissions:
       contents: write
     
@@ -23,7 +23,8 @@ jobs:
           
       - name: Install dependencies
         run: |
-          sudo apt-get install -y libxss1  # Required for Selenium
+          sudo apt-get update
+          sudo apt-get install -y libxss1 libasound2 libatk-bridge2.0-0 libgtk-3-0
           pip install -r requirements.txt
           
       - name: Run price tracker
@@ -32,22 +33,26 @@ jobs:
           
       - name: Generate report summary
         run: |
-          echo "### Price Tracker Report" >> report.md
+          echo "### Price Tracker Report" > report.md
           echo "**Run Date:** $(date)" >> report.md
           echo "#### Products Tracked:" >> report.md
-          jq -r '.products[] | "- \(.name): ₹\(.latest_price)"' reports/latest_run.json >> report.md
-          echo "![Price Trend](https://github.com/${{ github.repository }}/raw/${{ github.ref }}/reports/s23_trend.png)" >> report.md
+          if [ -f "reports/latest_run.json" ]; then
+            jq -r '.products[] | "- \(.name): ₹\(.latest_price)"' reports/latest_run.json >> report.md
+          else
+            echo "No report generated (possible error)" >> report.md
+          fi
+          echo "![Price Trend](https://github.com/${{ github.repository }}/raw/${{ github.ref }}/reports/sample_trend.png)" >> report.md
           
       - name: Commit and push results
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add price_history.db reports/
+          git add price_history.db reports/ || echo "No files to add"
           git commit -m "Update price data and reports" || echo "No changes to commit"
           git push
           
       - name: Upload reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # Updated to v4
         with:
           name: price-reports
           path: |
