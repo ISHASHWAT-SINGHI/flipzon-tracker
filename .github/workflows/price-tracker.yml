@@ -24,7 +24,8 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libxss1 libasound2 libatk-bridge2.0-0 libgtk-3-0
+          # Updated package names for Ubuntu 24.04
+          sudo apt-get install -y libxss1 libasound2t64 libatk-bridge2.0-0 libgtk-4-1 libnss3
           pip install -r requirements.txt
           
       - name: Run price tracker
@@ -52,7 +53,7 @@ jobs:
           git push
           
       - name: Upload reports
-        uses: actions/upload-artifact@v4  # Updated to v4
+        uses: actions/upload-artifact@v4
         with:
           name: price-reports
           path: |
