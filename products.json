@@ -1,0 +1,26 @@
+[
+  {
+    "id": "s23",
+    "name": "Samsung Galaxy S23",
+    "sources": [
+      {
+        "name": "Amazon",
+        "url": "https://www.amazon.in/Samsung-Galaxy-Storage-Additional-Exchange/dp/B0BVDHZJQ9/"
+      },
+      {
+        "name": "Flipkart",
+        "url": "https://www.flipkart.com/samsung-galaxy-s23-5g-cream-256-gb/p/itm0a5e0d5b1c7a2"
+      }
+    ]
+  },
+  {
+    "id": "iphone14",
+    "name": "iPhone 14",
+    "sources": [
+      {
+        "name": "Amazon",
+        "url": "https://www.amazon.in/Apple-iPhone-14-128GB-Blue/dp/B0BDK62PDX/"
+      }
+    ]
+  }
+]
